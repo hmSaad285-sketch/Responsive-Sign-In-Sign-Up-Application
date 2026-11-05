@@ -1,0 +1,116 @@
+// ---- "Database": a plain JS array of users ----
+const users = [{ name: "Demo User", email: "demo@example.com", password: "123456" }];
+
+// Optional persistence so accounts survive a page refresh (the array stays the source of truth)
+try {
+  JSON.parse(localStorage.getItem("users") || "[]").forEach(u => {
+    if (!users.some(x => x.email === u.email)) users.push(u);
+  });
+} catch (e) { /* storage unavailable: continue in memory */ }
+const save = () => { try { localStorage.setItem("users", JSON.stringify(users.slice(1))); } catch (e) {} };
+
+// ---- Elements ----
+const $ = id => document.getElementById(id);
+const signinForm = $("signinForm"), signupForm = $("signupForm");
+const alertBox = $("alert"), pill = $("pill");
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// ---- UI helpers ----
+function showAlert(type, msg) {
+  alertBox.className = "mt-4 rounded-lg px-4 py-3 text-sm panel " +
+    (type === "success" ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                        : "bg-rose-50 text-rose-700 border border-rose-200");
+  alertBox.textContent = msg;
+}
+const hideAlert = () => alertBox.classList.add("hidden");
+
+function clearErrors(form) {
+  form.querySelectorAll(".err").forEach(p => (p.textContent = ""));
+  form.querySelectorAll(".input").forEach(i => i.classList.remove("invalid"));
+}
+function setError(form, field, msg) {
+  form.querySelector(`[data-err="${field}"]`).textContent = msg;
+  form.elements[field].classList.add("invalid");
+}
+function shake(form) {
+  form.classList.remove("shake"); void form.offsetWidth; form.classList.add("shake");
+}
+
+function switchTab(toSignUp) {
+  hideAlert();
+  clearErrors(signinForm); clearErrors(signupForm);
+  signinForm.classList.toggle("hidden", toSignUp);
+  signupForm.classList.toggle("hidden", !toSignUp);
+  pill.style.transform = toSignUp ? "translateX(100%)" : "translateX(0)";
+  $("tabIn").classList.toggle("text-slate-500", toSignUp);
+  $("tabIn").classList.toggle("text-slate-900", !toSignUp);
+  $("tabUp").classList.toggle("text-slate-500", !toSignUp);
+  $("tabUp").classList.toggle("text-slate-900", toSignUp);
+  $("title").textContent = toSignUp ? "Create your account" : "Welcome back";
+  $("subtitle").textContent = toSignUp ? "It takes less than a minute." : "Sign in to continue.";
+}
+$("tabIn").onclick = () => switchTab(false);
+$("tabUp").onclick = () => switchTab(true);
+
+// Clear a field's error as soon as the user edits it
+document.querySelectorAll(".input").forEach(i =>
+  i.addEventListener("input", () => {
+    i.classList.remove("invalid");
+    i.parentElement.querySelector(".err").textContent = "";
+  })
+);
+
+// ---- Sign Up ----
+signupForm.addEventListener("submit", e => {
+  e.preventDefault();
+  clearErrors(signupForm); hideAlert();
+  const name = signupForm.name.value.trim();
+  const email = signupForm.email.value.trim().toLowerCase();
+  const password = signupForm.password.value;
+  const confirm = signupForm.confirm.value;
+  let ok = true;
+
+  if (!name) { setError(signupForm, "name", "Enter your name."); ok = false; }
+  if (!email) { setError(signupForm, "email", "Enter your email."); ok = false; }
+  else if (!EMAIL_RE.test(email)) { setError(signupForm, "email", "Enter a valid email address."); ok = false; }
+  if (!password) { setError(signupForm, "password", "Enter a password."); ok = false; }
+  else if (password.length < 6) { setError(signupForm, "password", "Use at least 6 characters."); ok = false; }
+  if (!confirm) { setError(signupForm, "confirm", "Confirm your password."); ok = false; }
+  else if (password !== confirm) { setError(signupForm, "confirm", "Passwords do not match."); ok = false; }
+
+  if (ok && users.some(u => u.email === email)) {
+    setError(signupForm, "email", "An account with this email already exists.");
+    ok = false;
+  }
+  if (!ok) return shake(signupForm);
+
+  users.push({ name, email, password });
+  save();
+  signupForm.reset();
+  switchTab(false);
+  signinForm.email.value = email;
+  showAlert("success", `Account created for ${name}. You can sign in now.`);
+});
+
+// ---- Sign In ----
+signinForm.addEventListener("submit", e => {
+  e.preventDefault();
+  clearErrors(signinForm); hideAlert();
+  const email = signinForm.email.value.trim().toLowerCase();
+  const password = signinForm.password.value;
+  let ok = true;
+
+  if (!email) { setError(signinForm, "email", "Enter your email."); ok = false; }
+  else if (!EMAIL_RE.test(email)) { setError(signinForm, "email", "Enter a valid email address."); ok = false; }
+  if (!password) { setError(signinForm, "password", "Enter your password."); ok = false; }
+  if (!ok) return shake(signinForm);
+
+  const user = users.find(u => u.email === email && u.password === password);
+  if (user) {
+    showAlert("success", `Signed in successfully. Welcome, ${user.name}!`);
+    signinForm.reset();
+  } else {
+    showAlert("error", "Incorrect email or password. Check your details and try again.");
+    shake(signinForm);
+  }
+});

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign In / Sign Up</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex items-center justify-center bg-slate-900 p-4 font-sans">
+  <main class="card w-full max-w-md bg-white rounded-2xl shadow-2xl p-6 sm:p-8">
+    <h1 id="title" class="text-2xl font-bold text-slate-900 text-center">Welcome back</h1>
+    <p id="subtitle" class="text-sm text-slate-500 text-center mt-1">Sign in to continue.</p>
+
+    <div class="relative grid grid-cols-2 bg-slate-100 rounded-xl p-1 mt-6 text-sm font-medium">
+      <span id="pill" class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] bg-white rounded-lg shadow transition-transform duration-300"></span>
+      <button id="tabIn" type="button" class="relative z-10 py-2 text-slate-900">Sign In</button>
+      <button id="tabUp" type="button" class="relative z-10 py-2 text-slate-500">Sign Up</button>
+    </div>
+
+    <div id="alert" role="alert" class="hidden mt-4 rounded-lg px-4 py-3 text-sm"></div>
+
+    <form id="signinForm" class="mt-5 space-y-4 panel" novalidate>
+      <div>
+        <label class="lbl" for="inEmail">Email</label>
+        <input class="input" id="inEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+        <p class="err" data-err="email"></p>
+      </div>
+      <div>
+        <label class="lbl" for="inPass">Password</label>
+        <input class="input" id="inPass" name="password" type="password" autocomplete="current-password" placeholder="Your password">
+        <p class="err" data-err="password"></p>
+      </div>
+      <button class="btn" type="submit">Sign In</button>
+      <p class="text-xs text-slate-400 text-center">Demo account: demo@example.com / 123456</p>
+    </form>
+
+    <form id="signupForm" class="hidden mt-5 space-y-4 panel" novalidate>
+      <div>
+        <label class="lbl" for="upName">Name</label>
+        <input class="input" id="upName" name="name" type="text" autocomplete="name" placeholder="Ayesha Khan">
+        <p class="err" data-err="name"></p>
+      </div>
+      <div>
+        <label class="lbl" for="upEmail">Email</label>
+        <input class="input" id="upEmail" name="email" type="email" autocomplete="email" placeholder="you@example.com">
+        <p class="err" data-err="email"></p>
+      </div>
+      <div>
+        <label class="lbl" for="upPass">Password</label>
+        <input class="input" id="upPass" name="password" type="password" autocomplete="new-password" placeholder="At least 6 characters">
+        <p class="err" data-err="password"></p>
+      </div>
+      <div>
+        <label class="lbl" for="upConfirm">Confirm password</label>
+        <input class="input" id="upConfirm" name="confirm" type="password" autocomplete="new-password" placeholder="Repeat your password">
+        <p class="err" data-err="confirm"></p>
+      </div>
+      <button class="btn" type="submit">Create Account</button>
+    </form>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
